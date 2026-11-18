@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F3F6EF">
+<title>AI育成ノート</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F3F6EF; --grid:#E1E7DA; --ink:#1E2B3A; --sub:#5D6B78;
+  --egg:#F2B632; --harii:#5B4B8A; --ok:#2E8B57; --ng:#C8463D; --card:#FFFFFF;
+  --code:"SFMono-Regular","Menlo","Consolas","Roboto Mono",monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;color:var(--ink);font-family:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Yu Gothic UI",sans-serif;
+  background:var(--paper);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:22px 22px;padding-bottom:env(safe-area-inset-bottom)}
+button{font:inherit;color:inherit}
+button:focus-visible,textarea:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--harii);outline-offset:2px}
+
+/* ヘッダー */
+header{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:10px;padding:8px 16px;
+  background:rgba(243,246,239,.94);backdrop-filter:blur(6px);border-bottom:2px solid var(--ink)}
+header h1{margin:0;font-size:1.05rem;font-weight:900;white-space:nowrap}
+#progress{flex:1;font-size:.8rem;color:var(--sub);text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#menuBtn{border:2px solid var(--ink);background:#fff;border-radius:8px;padding:4px 10px;font-weight:700;cursor:pointer}
+
+.wrap{max-width:760px;margin:0 auto;padding:0 16px}
+
+/* キャラクター */
+#stage{display:grid;gap:8px;padding:12px 0 4px}
+.char{display:flex;align-items:flex-end;gap:8px}
+.char.child{flex-direction:row-reverse}
+.portrait{flex:none;display:flex;align-items:flex-end;justify-content:center;overflow:hidden}
+.harii .portrait{width:104px;height:116px}
+.child .portrait{width:78px;height:84px}
+.portrait img{width:100%;height:100%;object-fit:contain;object-position:center bottom}
+.portrait .emoji{font-size:56px;line-height:1}
+.bubble{flex:1;min-width:0;background:var(--card);border:3px solid var(--ink);border-radius:16px;padding:8px 12px;font-weight:700;line-height:1.6;font-size:.95rem}
+.harii .bubble{border-color:var(--harii)}
+.child .bubble{border-color:var(--egg)}
+.who{display:block;font-size:.72rem;color:var(--sub);font-weight:500}
+#childName{background:none;border:none;padding:0;font-size:.72rem;color:var(--ink);text-decoration:underline dotted;cursor:pointer}
+.talking{animation:talk .42s ease-in-out infinite}
+@keyframes talk{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.react-happy{animation:hop .5s ease-out 2}
+.react-confused{animation:tilt .9s ease-in-out 1}
+@keyframes hop{0%,100%{transform:translateY(0)}40%{transform:translateY(-12px)}}
+@keyframes tilt{0%,100%{transform:rotate(0)}25%{transform:rotate(-8deg)}60%{transform:rotate(6deg)}}
+
+/* 章とレベル */
+.chips{display:flex;gap:6px;overflow-x:auto;padding:6px 0;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.chips::-webkit-scrollbar{display:none}
+.chips button{flex:none;border:2px solid var(--ink);background:#fff;padding:6px 12px;border-radius:999px;font-weight:700;font-size:.85rem;cursor:pointer;white-space:nowrap}
+.chips button.active{background:var(--ink);color:#fff}
+#chapters button.active{background:var(--egg);color:var(--ink)}
+.chips button:disabled{opacity:.4;cursor:not-allowed}
+
+section{background:var(--card);border:2px solid var(--ink);border-radius:8px;padding:16px;margin:10px 0}
+h2{margin:0 0 6px;font-size:1.15rem}
+.story{line-height:1.85;margin:0 0 10px}
+.badge{display:inline-block;font-size:.75rem;font-weight:700;padding:2px 8px;border-radius:999px;background:#EEF0F8;color:var(--harii);border:1px solid var(--harii);margin-bottom:8px}
+#modeBar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:8px 10px;margin:0 0 10px;border-radius:6px;background:var(--paper);border:2px dashed var(--ink);font-weight:700;font-size:.88rem}
+#modeBar.review{border-color:var(--harii);background:#EEF0F8}
+#modeBar button{border:2px solid var(--ink);border-radius:999px;background:#fff;padding:3px 10px;font-size:.8rem;font-weight:700;cursor:pointer}
+
+/* 授業 */
+#guide{margin:0 0 12px;border:2px solid var(--egg);border-radius:6px;background:#FFFBEE}
+#guide summary{padding:10px 12px;font-weight:900;cursor:pointer}
+#guideBody{padding:0 12px 6px}
+.gstep{padding:10px 0;border-top:1px solid #F0E3B8}
+.gstep h3{margin:0 0 4px;font-size:.98rem}
+.gstep h3 span{display:inline-block;min-width:1.6em;height:1.6em;line-height:1.6em;text-align:center;border-radius:50%;background:var(--egg);margin-right:6px;font-size:.8rem}
+.gstep p{margin:0;line-height:1.8;white-space:pre-wrap}
+pre{margin:8px 0 0;padding:10px 12px;background:#1E2B3A;color:#F3F6EF;border-radius:4px;font-family:var(--code);font-size:13px;line-height:1.6;overflow-x:auto;white-space:pre}
+
+/* エディタ */
+#code{display:block;width:100%;min-height:300px;font-family:var(--code);font-size:16px;line-height:1.55;padding:12px;border:2px solid var(--ink);border-radius:6px;
+  background:#1E2B3A;color:#F3F6EF;resize:vertical;tab-size:4;white-space:pre;overflow-x:auto;overflow-wrap:normal}
+#keys{position:sticky;bottom:0;z-index:15;display:flex;gap:4px;overflow-x:auto;padding:6px 0;background:var(--card);scrollbar-width:none}
+#keys::-webkit-scrollbar{display:none}
+#keys button{flex:none;min-width:40px;height:40px;border:2px solid var(--ink);border-radius:6px;background:var(--paper);font-family:var(--code);font-size:17px;font-weight:700;cursor:pointer;touch-action:manipulation}
+#keys button.wide{min-width:56px;font-family:inherit;font-size:13px}
+.actions{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.actions button{border:2px solid var(--ink);border-radius:8px;padding:10px 14px;font-weight:700;background:#fff;cursor:pointer}
+#runBtn{background:var(--egg);font-size:1.05rem;flex:1 1 100%}
+#quizBtn{background:var(--harii);color:#fff;flex:1 1 100%}
+.actions button:disabled{opacity:.6}
+#hintBox{white-space:pre-wrap;font-family:var(--code);font-size:13px;background:#FFF7E0;border-left:5px solid var(--egg);padding:10px 12px;margin-top:10px;line-height:1.6;display:none;overflow-x:auto}
+#errBox{display:none;margin-top:10px;padding:10px 12px;border-left:5px solid var(--ng);background:#FCECEA;font-family:var(--code);font-size:13px;white-space:pre-wrap;line-height:1.7;word-break:break-all}
+#loadBox{display:none;margin-top:10px;padding:10px 12px;border-left:5px solid var(--harii);background:#EEF0F8;font-size:.88rem;line-height:1.6}
+
+/* 結果 */
+#levelup{display:none;margin:0 0 10px;padding:10px;border:3px dashed var(--egg);font-weight:900;text-align:center}
+#kaisetsu{display:none;margin:0 0 12px;padding:12px;border:2px solid var(--harii);border-radius:8px;background:#F4F2FA}
+#kaisetsu h3{margin:0 0 6px;font-size:1rem;color:var(--harii)}
+#kaisetsu p{margin:0 0 10px;line-height:1.9}
+#kaisetsu button{border:2px solid var(--harii);border-radius:8px;padding:8px 12px;font-weight:700;background:#fff;cursor:pointer;margin:0 6px 6px 0}
+#kaisetsu #kQuiz{background:var(--harii);color:#fff}
+#accText{font-size:1.7rem;font-weight:900}
+.meter{position:relative;height:22px;border:2px solid var(--ink);border-radius:4px;background:var(--paper);margin:4px 0}
+.meter .fill{height:100%;background:var(--ok);width:0;transition:width .6s}
+.meter .goal{position:absolute;top:-5px;bottom:-5px;width:3px;background:var(--ng)}
+.small{font-size:.78rem;color:var(--sub)}
+.tablewrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;margin-top:8px;font-size:.88rem}
+th,td{padding:6px 4px;border-bottom:1px solid var(--grid);text-align:left;vertical-align:top}
+td.ok{color:var(--ok);font-weight:900}
+td.ng{color:var(--ng);font-weight:900}
+td.num{text-align:right;font-family:var(--code)}
+.trick td{background:#FCECEA}
+#note,#printed{display:none;margin-top:10px;padding:10px 12px;line-height:1.7;word-break:break-all}
+#note{background:#EEF0F8;border-left:5px solid var(--harii)}
+#printed{background:#1E2B3A;color:#F3F6EF;font-family:var(--code);font-size:13px;white-space:pre-wrap;border-radius:4px}
+details.more{margin-top:12px}
+details.more summary{font-weight:700;cursor:pointer;padding:4px 0}
+#samples{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+#samples figure{margin:0;text-align:center;font-size:.75rem}
+#samples canvas{image-rendering:pixelated;border:2px solid var(--ink);background:#000;display:block}
+.term{padding:8px 0;border-bottom:1px solid var(--grid)}
+.term .rei{color:var(--harii);font-weight:700}
+
+/* ハリリと話す */
+#talkBox{display:none}
+#talkLog{max-height:260px;overflow-y:auto;margin:8px 0;display:flex;flex-direction:column;gap:6px}
+.msg{padding:8px 10px;border-radius:12px;line-height:1.6;max-width:85%}
+.msg.me{align-self:flex-end;background:#FFF7E0;border:2px solid var(--egg)}
+.msg.bot{align-self:flex-start;background:#fff;border:2px solid var(--harii)}
+.talkRow{display:flex;gap:6px}
+.talkRow input{flex:1;min-width:0;font:inherit;font-size:16px;padding:10px;border:2px solid var(--ink);border-radius:8px}
+.talkRow button{border:2px solid var(--ink);border-radius:8px;background:var(--egg);font-weight:700;padding:0 14px;cursor:pointer}
+
+/* ダイアログ */
+.dlg{position:fixed;inset:0;z-index:50;background:rgba(30,43,58,.55);display:none;align-items:center;justify-content:center;padding:14px}
+.dlg .box{background:var(--card);border:3px solid var(--ink);border-radius:12px;padding:18px;max-width:560px;width:100%;max-height:90vh;overflow:auto}
+.dlg input[type=text]{width:100%;font:inherit;font-size:16px;padding:10px;border:2px solid var(--ink);border-radius:8px;margin:4px 0 8px}
+.dlg label.f{font-size:.82rem;font-weight:700}
+.dlg .btns{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.dlg .btns button{border:2px solid var(--ink);border-radius:8px;padding:10px 16px;font-weight:900;background:#fff;cursor:pointer}
+.dlg .btns .main{background:var(--egg)}
+.qa{margin:12px 0;padding-bottom:10px;border-bottom:1px solid var(--grid)}
+.qa p{font-weight:700;margin:0 0 6px;line-height:1.6}
+.qa label{display:flex;gap:8px;align-items:flex-start;padding:8px;border-radius:6px;cursor:pointer;line-height:1.5}
+.qa label:hover{background:var(--paper)}
+.why{margin-top:6px;padding:6px 8px;border-left:4px solid var(--ok);background:#EAF5EE;line-height:1.6}
+.why.ng{border-color:var(--ng);background:#FCECEA}
+.switch{display:flex;align-items:center;gap:8px;padding:10px 0;font-weight:700}
+.switch input{width:22px;height:22px}
+@media (prefers-reduced-motion:reduce){.talking,.react-happy,.react-confused{animation:none}.meter .fill{transition:none}}
+@media (min-width:700px){
+  #stage{grid-template-columns:1fr 1fr;align-items:end}
+  .harii .portrait{width:150px;height:166px}
+  .child .portrait{width:110px;height:120px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>AI育成ノート</h1>
+  <div id="progress"></div>
+  <button id="menuBtn" onclick="openMenu()" aria-label="設定">⚙</button>
+</header>
+
+<div class="wrap">
+  <div id="stage">
+    <div class="char harii">
+      <div class="portrait" id="hariiBox"><img id="hariiImg" src="img/harii/normal.webp" alt="HARII"></div>
+      <div class="bubble"><span class="who">HARII（先生）</span><span id="hariiText">……読み込み中。ちょっと待ってて。</span></div>
+    </div>
+    <div class="char child">
+      <div class="portrait" id="childBox"><img id="childImg" src="img/child/base.webp" alt="弟子"></div>
+      <div class="bubble"><button id="childName" onclick="openName(true)" title="名前を変える">？？？</button><span id="childText" style="display:block">……</span></div>
+    </div>
+  </div>
+
+  <div class="chips" id="chapters"></div>
+  <div class="chips" id="tabs"></div>
+
+  <section id="lessonCard">
+    <span class="badge" id="mobileBadge" style="display:none">📱 スマホ版オリジナル</span>
+    <h2 id="lTitle"></h2>
+    <p class="story" id="lStory"></p>
+    <div id="modeBar"><span id="modeText"></span><button id="oldCodeBtn" onclick="loadOldCode()">前に書いたコードを見る</button></div>
+    <details id="guide"><summary>📖 授業（まずここを読もう）</summary><div id="guideBody"></div></details>
+    <textarea id="code" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" aria-label="弟子の脳ファイル（コード）"></textarea>
+    <div id="keys"></div>
+    <div class="actions">
+      <button id="runBtn" onclick="run()">試験を受けさせる</button>
+      <button id="quizBtn" onclick="openQuiz()">理解クイズに挑戦</button>
+      <button id="hintBtn" onclick="nextHint()">ヒントを見る</button>
+      <button id="ansBtn" onclick="showAnswer()">答えを見る</button>
+      <button onclick="resetCode()">書き出しに戻す</button>
+    </div>
+    <div id="loadBox"></div>
+    <div id="hintBox"></div>
+    <div id="errBox"></div>
+  </section>
+
+  <section id="resultCard">
+    <div id="levelup"></div>
+    <div id="kaisetsu">
+      <h3>🎓 HARIIの解説</h3>
+      <p id="kText"></p>
+      <button onclick="readKaisetsu()">🔊 読み上げる</button>
+      <button id="kQuiz" onclick="openQuiz()">理解クイズへ進む</button>
+    </div>
+    <h2>試験の結果</h2>
+    <div id="accText">－</div>
+    <div class="meter"><div class="fill" id="fill"></div><div class="goal" id="goal"></div></div>
+    <div class="small">赤い線が合格ライン</div>
+    <div class="tablewrap"><table id="result"><thead><tr><th>問題</th><th>AIの答え</th><th>正解</th><th></th></tr></thead><tbody></tbody></table></div>
+    <div id="note"></div>
+    <div id="printed"></div>
+    <details class="more" id="samplesBox"><summary>見本（試験に出る絵）</summary><div id="samples"></div></details>
+    <details class="more" id="albumBox"><summary>思い出アルバム（AIが見たことのある動物）</summary>
+      <div class="tablewrap"><table id="album"></table></div><p class="small">数字は0〜10。この表から犬と猫の違いを探そう。</p></details>
+    <details class="more"><summary>用語ノート</summary><div id="noteList"></div></details>
+  </section>
+
+  <section id="talkBox">
+    <h2>💬 ハリリと話す</h2>
+    <p class="small">Lv43 で作った、あなたのハリリです。「覚えて：〇〇」で教えて、あとで質問してみよう。</p>
+    <div id="talkLog"></div>
+    <div class="talkRow"><input type="text" id="talkInput" placeholder="例：覚えて：好きな色は紫" aria-label="ハリリに話しかける"><button onclick="talkSend()">送る</button></div>
+  </section>
+  <p class="small" style="text-align:center;margin:16px 0 28px">AI育成ノート スマホ版　／　PC版では本物の大きな脳・声・PyTorch を使います</p>
+</div>
+
+<!-- 名付け -->
+<div class="dlg" id="nameDlg" role="dialog" aria-modal="true" aria-labelledby="nameQ">
+  <div class="box">
+    <p id="nameQ" style="font-weight:700"><b>HARII：</b>で、こいつの名前どうすんの？</p>
+    <label class="f" for="nameInput">弟子の名前</label><input type="text" id="nameInput" maxlength="12" placeholder="例：HaRiRi">
+    <label class="f" for="yomiInput">弟子の呼び方（読み方）</label><input type="text" id="yomiInput" maxlength="12" placeholder="例：ハリリ">
+    <label class="f" for="userInput">あなたの呼ばれ方</label><input type="text" id="userInput" maxlength="12" placeholder="例：宏仁">
+    <div class="btns"><button class="main" onclick="giveName()">この名前にする</button><button id="nameCancel" onclick="closeDlg('nameDlg')">やめる</button></div>
+  </div>
+</div>
+
+<!-- クイズ -->
+<div class="dlg" id="quizDlg" role="dialog" aria-modal="true" aria-labelledby="quizTitle">
+  <div class="box">
+    <h2 id="quizTitle">理解クイズ</h2>
+    <p class="small" id="quizNote"></p>
+    <div id="quizBody"></div>
+    <div class="btns"><button class="main" id="quizSubmit" onclick="submitQuiz()">答え合わせ</button><button id="quizClose" onclick="closeQuiz()" style="display:none">閉じる</button></div>
+  </div>
+</div>
+
+<!-- 設定 -->
+<div class="dlg" id="menuDlg" role="dialog" aria-modal="true" aria-labelledby="menuTitle">
+  <div class="box">
+    <h2 id="menuTitle">設定</h2>
+    <label class="switch"><input type="checkbox" id="voiceSw" onchange="setVoice(this.checked)"> HARIIのセリフを読み上げる（スマホの声）</label>
+    <label class="switch"><input type="checkbox" id="kaiSw" onchange="setKaiVoice(this.checked)"> 合格したら解説も読み上げる</label>
+    <p class="small">セーブはこのスマホのブラウザの中にだけ保存されます。ブラウザの履歴やデータを消すと、セーブも消えます。PC版とはつながっていません。</p>
+    <div class="btns">
+      <button onclick="openName(true)">名前を変える</button>
+      <button onclick="resetAll()" style="color:var(--ng);border-color:var(--ng)">最初から育て直す</button>
+      <button class="main" onclick="closeDlg('menuDlg')">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
